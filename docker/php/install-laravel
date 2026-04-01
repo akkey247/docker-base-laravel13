@@ -2,55 +2,47 @@
 
 # Laravel Install
 laravel_install () {
-    composer create-project --prefer-dist laravel/laravel=13.* .
-    sed -i'' -e "s/\(DB_CONNECTION=\).*/\1mysql/" .env
-    sed -i'' -e "s/# \(DB_HOST=\).*/\1db/" .env
-    sed -i'' -e "s/# \(DB_PORT=\).*/\13306/" .env
-    sed -i'' -e "s/# \(DB_DATABASE=\).*/\1laravel/" .env
-    sed -i'' -e "s/# \(DB_USERNAME=\).*/\1laravel-user/" .env
-    sed -i'' -e "s/# \(DB_PASSWORD=\).*/\1laravel-pass/" .env
-    sed -i'' -e "s/\(MAIL_HOST=\).*/\1mailhog/" .env
+    composer create-project --prefer-dist "laravel/laravel:^13.0" .
+
+    sed -i'' -e "s/^\(# \)\?\(DB_CONNECTION=\).*/\2mysql/" .env
+    sed -i'' -e "s/^\(# \)\?\(DB_HOST=\).*/\2db/" .env
+    sed -i'' -e "s/^\(# \)\?\(DB_PORT=\).*/\23306/" .env
+    sed -i'' -e "s/^\(# \)\?\(DB_DATABASE=\).*/\2laravel/" .env
+    sed -i'' -e "s/^\(# \)\?\(DB_USERNAME=\).*/\2laravel-user/" .env
+    sed -i'' -e "s/^\(# \)\?\(DB_PASSWORD=\).*/\2laravel-pass/" .env
+    sed -i'' -e "s/^\(# \)\?\(MAIL_HOST=\).*/\2mailhog/" .env
+
     php artisan migrate
 }
 
-# Laravel Breeze Install
-laravel_breeze_install () {
-    breeze_type=$1
-    composer require laravel/breeze --dev
-    php artisan breeze:install ${breeze_type}
+# New Starter Kit Install
+# stack: react | vue | svelte | livewire
+laravel_starter_kit_install () {
+    local stack=${1:-livewire}
+
+    case "$stack" in
+        react)    using="laravel/react-starter-kit" ;;
+        vue)      using="laravel/vue-starter-kit" ;;
+        svelte)   using="laravel/svelte-starter-kit" ;;
+        livewire) using="laravel/livewire-starter-kit" ;;
+        *)
+            echo "Unknown stack: $stack"
+            echo "Available: react, vue, svelte, livewire"
+            exit 1
+            ;;
+    esac
+
+    composer create-project --prefer-dist "$using" .
     npm install
-    npm run dev
-}
-
-# Laravel Jetstream Install
-laravel_jetstream_install () {
-    jetstream_type=$1
-    options=${@:2}
-    composer require laravel/jetstream
-    php artisan jetstream:install ${jetstream_type} ${options}
-    php artisan migrate:refresh
-}
-
-# Laravel Fortify Install
-laravel_fortify_install () {
-    options=$1
-    composer require laravel/fortify
-    php artisan fortify:install
-    php artisan migrate:refresh
+    npm run build
 }
 
 # Help
 usage () {
   cat << EOM
 Usage: $(basename "$0") [OPTION]...
-      --breeze          install laravel-breeze
-      --breeze=TYPE     install laravel-breeze TYPE: vue or react
-      --jetstream       install laravel-jetstream
-      --jetstream=TYPE  install laravel-jetstream TYPE: livewire or inertia
-      --fortify         install laravel-fortify
-      --teams           add teams option for laravel-jetstream
-      --api             add API support option for laravel-jetstream
-      --verification    add email verification support option for laravel-jetstream
+      --kit             install new starter kit (default: livewire)
+      --kit=STACK       install new starter kit STACK: react, vue, svelte, livewire
   -h, --help            display this help and exit
   -v, --version         output version information and exit
 EOM
@@ -58,49 +50,24 @@ EOM
 
 # Version
 version () {
-    echo 'v1.0.0'
+    echo 'v2.0.0'
 }
 
 cd /var/www
 
-use_ui=false
-use_breeze=false
-use_jetstream=false
-use_fortify=false
-jetstream_options=''
-fortify_options=''
+use_kit=false
+kit_stack='livewire'
 
 while getopts :-: opt; do
     if [ "$opt" = - ]; then
         case "${OPTARG%%=*}" in
-            breeze)
-                use_breeze=true
+            kit)
+                use_kit=true
                 case "${OPTARG##*=}" in
-                    vue|react)
-                        breeze_type="${OPTARG##*=}"
+                    react|vue|svelte|livewire)
+                        kit_stack="${OPTARG##*=}"
                         ;;
                 esac
-                ;;
-            jetstream)
-                use_jetstream=true
-                case "${OPTARG##*=}" in
-                    livewire|inertia)
-                        jetstream_type="${OPTARG##*=}"
-                        ;;
-                esac
-                ;;
-            fortify)
-                use_fortify=true
-                ;;
-            teams)
-                jetstream_options="${jetstream_options} --teams"
-                fortify_options="--teams"
-                ;;
-            api)
-                jetstream_options="${jetstream_options} --api"
-                ;;
-            verification)
-                jetstream_options="${jetstream_options} --verification"
                 ;;
             help)
                 usage
@@ -118,14 +85,8 @@ while getopts :-: opt; do
         esac
     else
         case "$opt" in
-            h)
-                usage
-                exit
-                ;;
-            v)
-                version
-                exit
-                ;;
+            h) usage; exit ;;
+            v) version; exit ;;
             *)
                 echo "$0: illegal option -$opt"
                 usage
@@ -133,17 +94,10 @@ while getopts :-: opt; do
                 ;;
         esac
     fi
-    # Optional arguments
-    if [ -z "$OPTARG" ] && [ "${!OPTIND}" != -* ]; then
-        OPTIND=$((OPTIND + 1))
-    fi
 done
 
 laravel_install
-if "${use_breeze}"; then
-    laravel_breeze_install ${breeze_type}
-elif "${use_jetstream}"; then
-    laravel_jetstream_install ${jetstream_type} ${jetstream_options}
-elif "${use_fortify}"; then
-    laravel_fortify_install ${fortify_options}
+
+if "${use_kit}"; then
+    laravel_starter_kit_install "${kit_stack}"
 fi
