@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm -rf /var/www/* /var/www/.*
+mysql --host=db --port=3306 --user=laravel-user --password=laravel-pass --database=laravel --execute="SHOW TABLES" -s | xargs -I "@@" mysql --host=db --port=3306 --user=laravel-user --password=laravel-pass --database=laravel --execute="DROP TABLE @@"

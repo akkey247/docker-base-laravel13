@@ -1,0 +1,5 @@
+docker/db
+docker/https-portal
+myapp
+logs
+!.gitkeep
