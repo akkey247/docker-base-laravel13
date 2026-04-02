@@ -17,21 +17,22 @@ $ docker-compose exec php bash
 ### 3. 自動インストール
 
 ```
-/var/www# install-laravel --jetstream=livewire --verification
+/var/www# install-laravel
 ```
 
-|オプション|説明|
+スターターキット（[Laravel Starter Kits](https://laravel.com/docs/starter-kits) 系）を使う場合の例です。
+
+```
+/var/www# install-laravel --kit
+/var/www# install-laravel --kit=vue
+```
+
+| オプション | 説明 |
 |---|---|
-|--breeze|Laravel Breeze をインストールする。標準インストール(Alpne.js)。|
-|--breeze=TYPE|Laravel Breeze をインストールする。TYPEには vue, react が指定できる。|
-|--jetstream|Laravel Jetstream をインストールする。標準インストール(Livewire)。|
-|--jetstream=TYPE|Laravel Jetstream をインストールする。TYPEには livewire, inertia が指定できる。|
-|--fortify|Laravel Fortify をインストールする。|
-|--teams|Laravel Jetstream のチーム機能を有効にする。(Fortify でも指定可能)|
-|--api|Laravel Jetstream のAPI機能を有効にする。|
-|--verification|Laravel Jetstream のメールバリデーション機能を有効にする。|
-|-h, --help|ヘルプを表示する|
-|-v, --version|コマンドのバージョンを表示する|
+| `--kit` | スターターキットを入れる（既定のスタックは livewire） |
+| `--kit=STACK` | スタックを指定。TYPEには `react` `vue` `svelte` `livewire` が指定できる。 |
+| `-h`, `--help` | ヘルプを表示する |
+| `-v`, `--version` | バージョンを表示する |
 
 ### 4. storage ディレクトリの権限を変更
 
@@ -72,9 +73,9 @@ $ docker-compose down
 $ docker-compose down --rmi all --volumes
 ```
 
-## 備考1: Vue, React 利用時の Vite 設定
+## 備考1: Vue, React 利用時の Vite 設定 (Laravel13で起きるのかは不明。起きないならこの項目は削除していいかも。)
 
-初期の `vite.config.js` では画面が真っ白になるので以下の設定を加える。  
+スターターキットやフロントを使う場合、初期の `vite.config.js` では画面が真っ白になることがあるので、以下の設定を加える。
 
 ```
 export default defineConfig({
