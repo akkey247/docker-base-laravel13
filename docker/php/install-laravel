@@ -37,12 +37,21 @@ laravel_starter_kit_install () {
     npm run build
 }
 
+# Laravel Fortify Install
+laravel_fortify_install () {
+    options=$1
+    composer require laravel/fortify
+    php artisan fortify:install
+    php artisan migrate:refresh
+}
+
 # Help
 usage () {
   cat << EOM
 Usage: $(basename "$0") [OPTION]...
       --kit             install new starter kit (default: livewire)
       --kit=STACK       install new starter kit STACK: react, vue, svelte, livewire
+      --fortify         install Laravel Fortify (ignored if --kit is used)
   -h, --help            display this help and exit
   -v, --version         output version information and exit
 EOM
@@ -57,6 +66,7 @@ cd /var/www
 
 use_kit=false
 kit_stack='livewire'
+use_fortify=false
 
 while getopts :-: opt; do
     if [ "$opt" = - ]; then
@@ -68,6 +78,9 @@ while getopts :-: opt; do
                         kit_stack="${OPTARG##*=}"
                         ;;
                 esac
+                ;;
+            fortify)
+                use_fortify=true
                 ;;
             help)
                 usage
@@ -100,4 +113,6 @@ laravel_install
 
 if "${use_kit}"; then
     laravel_starter_kit_install "${kit_stack}"
+elif "${use_fortify}"; then
+    laravel_fortify_install
 fi
