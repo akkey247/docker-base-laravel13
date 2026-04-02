@@ -32,7 +32,7 @@ services:
       - 3306:3306
     environment:
       TZ: "Asia/Tokyo"
-      MYSQL_ROOT_PASSWORD: b2UcuTPQ
+      MYSQL_ROOT_PASSWORD: mysql-root-pass
       MYSQL_DATABASE: laravel
       MYSQL_USER: laravel-user
       MYSQL_PASSWORD: laravel-pass
